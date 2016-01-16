@@ -1,15 +1,17 @@
 # require 'chunky_png_subimage'
 # require 'chunky_png'
-# require 'win32/screenshot'
+require 'win32/screenshot'
 require 'rumouse'
+require 'sinatra'
 
 $screen_width = 1920
 $screen_height = 1080
 
 def trace_from_topright_corner
 	while true
-		print '$screen_width - ' + ($screen_width - cursor_position[0].to_i).to_s
-		print ', ' + cursor_position[1].to_i
+		mouse = RuMouse.new
+		print '$screen_width - ' + ($screen_width - mouse.position[:x].to_i).to_s
+		print ', ' + mouse.position[:y].to_s
 		puts
 		sleep 2
 	end
@@ -91,14 +93,49 @@ def loop_tabs
 			#do stuff
 
 
-			sleep 3
+			sleep 8
 		end
 	end
 end
 
-# buy_peasants(few: 1)
-loop_tabs()
+def logs
+	mouse = RuMouse.new
+	mouse.click(*$positions[:logs])
+	sleep $step_sleep
+	# Win32::Screenshot::Take.of(:window, title: /Stronghold Kingdoms/i).write!("screen.bmp")
+	Win32::Screenshot::Take.of(:desktop).write!("public/screen.png")
+end
 
 
-
+# loop_tabs()
 # buy_peasants(few: 3, many: 0, alot: 0)
+
+set :public_folder, 'public/'
+set :bind, '0.0.0.0'
+set :port, 4567
+
+get '/logs' do
+	logs
+	erb :logs
+end
+
+get '/buy/peasants/:count' do
+	buy_peasants(few: params[:count].to_i)
+	sleep 1
+	Win32::Screenshot::Take.of(:desktop).write!("public/screen.png")
+	erb :logs
+end
+
+get '/messages' do
+	mouse = RuMouse.new
+	mouse.click($screen_width - 406, 40)
+	sleep 1
+	Win32::Screenshot::Take.of(:desktop).write!("public/screen.png")
+	erb :logs
+end
+
+####
+
+Thread.new do
+	trace_from_topright_corner()
+end
