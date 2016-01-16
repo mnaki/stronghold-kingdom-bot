@@ -1,8 +1,7 @@
-require 'chunky_png_subimage'
-require 'chunky_png'
-require 'auto_click'
-require 'win32/screenshot'
-require 'pry'
+# require 'chunky_png_subimage'
+# require 'chunky_png'
+# require 'win32/screenshot'
+require 'rumouse'
 
 $screen_width = 1920
 $screen_height = 1080
@@ -54,28 +53,52 @@ $subtab_positions = [
 	[$screen_width - 35, 130]
 ]
 
+$step_sleep = 1
+
 def buy_peasants(few: 0, many: 0, alot: 0)
-	mouse_move(*$positions[:village])
-	left_click()
-	sleep 0.5
-	mouse_move(*$subtab_positions[4])
-	left_click()
-	sleep 0.5
+	mouse = RuMouse.new
+	mouse.click(*$positions[:village])
+	sleep $step_sleep
+	mouse.click(*$subtab_positions[4])
+	sleep $step_sleep
 	few.times do |i|
-		mouse_move($screen_width/2 - 448, $screen_height/2 - -26)
-		left_click()
-		sleep 0.5
+		mouse.click($screen_width/2 - 448, $screen_height/2 - -26)
+		sleep $step_sleep
 	end
 	many.times do |i|
-		mouse_move($screen_width/2 - 399, $screen_height/2 - -26)
-		left_click()
-		sleep 0.5
+		mouse.click($screen_width/2 - 399, $screen_height/2 - -26)
+		sleep $step_sleep
 	end
 	alot.times do |i|
-		mouse_move($screen_width/2 - 352, $screen_height/2 - -26)
-		left_click()
-		sleep 0.5
+		mouse.click($screen_width/2 - 352, $screen_height/2 - -26)
+		sleep $step_sleep
 	end
 end
 
-buy_peasants(few: 3, many: 0, alot: 0)
+def loop_tabs
+	mouse = RuMouse.new
+	mouse.click(*$positions[:village])
+	sleep $step_sleep
+	arr = $subtab_positions.clone.rotate(-1)
+	while true
+		arr.each do |p|
+			prev = mouse.position
+			mouse.click(*p)
+			sleep 0.1
+			mouse.move(prev[:x], prev[:y])
+
+
+			#do stuff
+
+
+			sleep 3
+		end
+	end
+end
+
+# buy_peasants(few: 1)
+loop_tabs()
+
+
+
+# buy_peasants(few: 3, many: 0, alot: 0)
